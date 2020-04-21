@@ -84,6 +84,7 @@ public class Scheduler {
 
 		//If a node has an incoming edge, it's -1
 		//If it does not have any, then its node number is added to active set 
+		//This gets us started with the courses with 0 prereqs 
 		for (Course crs: c){
 			int nodeIndex = graph.getNodeWithNoIncoming(graph.lookup(crs.getName())); 
 			if (nodeIndex != -1){
