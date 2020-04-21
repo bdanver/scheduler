@@ -15,6 +15,7 @@ class Course {
         return name; 
 	}
 
+	//Never used 
 	public int getPrereqCount(){
 		return prereqs;
 	}
@@ -29,6 +30,7 @@ public class Scheduler {
 			return;
 		}
 
+		//A lot of variables 
 		File f = new File(args[0]); 
 		Scanner s = new Scanner(f);
 		int graphSize = 0;  
@@ -37,13 +39,17 @@ public class Scheduler {
 		ArrayList<Course> c = new ArrayList<Course>(prereq);
 		Graph<String> graph;  
 		boolean scannerClose = false;
+		ArrayList<Integer> ordering = new ArrayList<>(); 
+		ArrayList<Integer> activeSet = new ArrayList<>(); 
+		int mNode = 0;
+		boolean topologicalOrder = false;
 
+		//First read over. Makes Course object 
 		if (!f.exists()){
 			System.out.println("File does not exist.");
 			return;
 		} else {
 			scannerClose = false; 
-			System.out.println("Name: " + f); 
 			graphSize = Integer.parseInt(s.nextLine());
 			graph = new Graph<String>(graphSize);
 			while (s.hasNextLine()) {
@@ -55,29 +61,70 @@ public class Scheduler {
 				c.add(crs); 
 			}
 		}
+
+		//Insert nodes in graph 
 		for (int i = 0; i < graph.getSize(); i++){
 			graph.setValue(i, c.get(i).getName()); 
 		}
-
-		System.out.println("size: " + graph.getSize());
 		s.close();
 		scannerClose = true;
 
-		//Second read over
+		//Second read over. Insert edges in graph 
 		Scanner s2 = new Scanner(f);
 		if (scannerClose){
 			String line1 = s2.nextLine(); //throw away
 			while (s2.hasNextLine()){
 				String line2 = s2.nextLine(); 
 				String[] splitPrereq = line2.split(" "); 
-				//if your prereq is 0 you have no edges 
 				for (int i = 2; i < splitPrereq.length; i++){
-					//System.out.println(splitPrereq[0] + " : " + splitPrereq[i]);
 					graph.insertEdge(splitPrereq[0], splitPrereq[i]);
 				}
 			}
 		}
-		// System.out.println(graph.isEdge(graph.lookup("CPSC430"), graph.lookup("CPSC340")));
-		// System.out.println(graph.isEdge(graph.lookup("CPSC430"), graph.lookup("CPSC110")));
+
+		//If a node has an incoming edge, it's -1
+		//If it does not have any, then its node number is added to active set 
+		for (Course crs: c){
+			int nodeIndex = graph.getNodeWithNoIncoming(graph.lookup(crs.getName())); 
+			if (nodeIndex != -1){
+				activeSet.add(nodeIndex);
+			}
+		}
+
+		//Topological ordering 
+		//Selects random node (winner) from active set. Removes all the edges 
+		//Once mNode does not have any incoming edges, add to active set
+		//Repeat until active set is empty 
+        while (!activeSet.isEmpty()){
+            Random r = new Random(); 
+			Integer winner = activeSet.get(r.nextInt(activeSet.size())); //node number 
+			activeSet.remove(winner); 
+            ordering.add(winner);
+            for (int m = 0; m < graph.getSize(); m++){
+				if (graph.isEdge(m, winner)){
+					graph.removeEdge(m, winner);
+					mNode = m;
+					if (!graph.hasIncomingEdge(mNode)){
+						activeSet.add(mNode);
+					}
+				}
+			}	
+		}
+
+		//Graph has topological order once all of the edges are removed 
+		if (graph.isEmpty()){
+			topologicalOrder = true;
+		} else {
+			System.out.println("There is no topological order.");
+		}
+		
+		//Prints out the order
+		//hehe = numbering the courses from 1 to size 
+		if (topologicalOrder){
+			for (int o : ordering){
+				int hehe = ordering.indexOf(o);
+				System.out.println((hehe+=1) + ". " + graph.getValue(o)); 
+			}	
+		}
 	}
 }
