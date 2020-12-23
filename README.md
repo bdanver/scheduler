@@ -15,3 +15,8 @@ The following is the topological sorting algorithm used:
 5. Otherwise, the topological ordering is in the “ordering” list.
 
 Link to assignment from CPSC 340: Data Structures and Algorithms [here](https://www.dropbox.com/s/ylqoebjvaqhfzsw/Assignment%205%20-%20Course%20Scheduler.pdf?dl=0).  
+
+# How to Run in Terminal
+`javac *.java`
+
+`java Scheduler [filename]`
